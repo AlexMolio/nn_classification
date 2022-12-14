@@ -58,7 +58,7 @@ for i = 1:N
     figure, plot(y1,x1,'o');
     axis([-200 200 0 1000]);
 
-    % todo: generate echo signal with params: fd = 120 000, fs = 30 000, T = 4
+    % done: generate echo signal with params: fd = 120 000, fs = 30 000, T = 4
 
     A = 10+rand(1)*10;
     T = 4;
@@ -66,7 +66,7 @@ for i = 1:N
     fs = 30000;
     num = floor(T*fd);
     t = (1:num)/fd;
-    s = randn(2, num);
+    signal = randn(2, num);
     
     for p = 1:length(x1)
     
@@ -76,24 +76,110 @@ for i = 1:N
         i2 = floor((r/1500 + 1e-3)*fd);
         d = 1500/(2*fs);
         tau = d*sind(p_fi)/1500;
-        s(1,i1:i2) = s(1,i1:i2) + A*sin(2*pi*fs*t(i1:i2));
-        s(2,i1:i2) = s(2,i1:i2) + A*sin(2*pi*fs*(t(i1:i2)+tau));
+        signal(1,i1:i2) = signal(1,i1:i2) + A*sin(2*pi*fs*t(i1:i2));
+        signal(2,i1:i2) = signal(2,i1:i2) + A*sin(2*pi*fs*(t(i1:i2)+tau));
     
     end
 
-    figure, plot(s(1,:));
+    figure, plot(signal(1,:));
     hold on;
-    plot(s(2,:));
+    plot(signal(2,:));
 
-    % todo: process input signal
-        % todo: make fft to find band with our signal
-        % todo: filter signal by bandpass
-        % todo: find peaks
-        % todo: calculate phase difference in peaks
-        % todo: calculate distance
-        % todo: transform to coords
+    % done: process input signal
+
+    [x,y] = process_echo(signal);
+
+    figure, plot(x,y, 'o');
+    axis([-200 200 0 1000]);
+
+
+
     % todo: calculate width and length
     % todo: train NN
     % todo: calculate VPK
 
 end
+
+function [x,y] = process_echo(s)
+
+    % done: make fft to find band with our signal
+
+    f = zeros(size(s));
+    f(1,:) = fft(s(1,:));
+    f(2,:) = fft(s(2,:));
+
+%     figure, plot(-pi:1.308999e-5:pi, f)
+%     axis([0 pi 0 10000])
+    
+    fd = 120000;
+    fs = 30000;
+
+    % done: filter signal by bandpass
+
+    fmin = floor(0.9*(fs/fd)*size(f,2));
+    fmax = floor(1.1*(fs/fd)*size(f,2));
+    
+    f(1,1:fmin) = 0;
+    f(1,fmax:end) = 0;
+    f(2, 1:fmin) = 0;
+    f(2, fmax:end) = 0;
+
+%     figure, plot(-pi:1.308999e-5:pi, f)
+%     axis([0 pi 0 10000])
+    
+    hr = ifft(f(1,:));
+    hl = ifft(f(2,:));
+    
+    sigma = sqrt(sum((abs(hr)).^2)/length(hr));
+    
+    phi = angle(exp(1i*(angle(hr)-angle(hl))));
+
+    theta = angle(hr)-angle(hl);
+
+    % done: find peaks
+    
+    iii = find(abs(hr) > sigma*3);
+    
+    peak = iii(1);
+    
+    stop = [];
+    
+    qqq = 1;
+    
+    for i = 2:length(iii)
+    
+        if (iii(i)-iii(i-1)>2) || (i-qqq>fd/1000)
+        
+            qqq = i;
+            peak = [peak iii(i)];
+            stop = [stop iii(i-1)];
+        
+        end
+    
+    end
+    stop = [stop iii(end)];
+   
+
+    % done: calculate phase difference in peaks
+
+    for i = 1 : length(peak)
+    
+        ft(i) = sum(phi(peak(i):stop(i)).*abs(hr(peak(i):stop(i))))/sum(abs(hr(peak(i):stop(i))));
+    
+    end
+
+    
+    
+    d = 1500/(2*fs);
+    
+    alfa = asind(abs(ft * 1500)/(2*pi*fs*d));
+    
+    % done: calculate distance
+    r = peak/fd*1500;
+    
+    % done: transform to coords
+    y = r.*cosd(alfa);
+    x = r.*sind(alfa);
+
+end
+

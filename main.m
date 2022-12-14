@@ -92,9 +92,9 @@ for i = 1:N
     figure, plot(x,y, 'o');
     axis([-200 200 0 1000]);
 
+    % done: calculate width and length
+    [ sample ] = calc_params(x, y);
 
-
-    % todo: calculate width and length
     % todo: train NN
     % todo: calculate VPK
 
@@ -182,4 +182,34 @@ function [x,y] = process_echo(s)
     x = r.*sind(alfa);
 
 end
+
+function [ sample ] = calc_params(x, y)
+
+    N = length(x);
+    
+    alpha = atand(sum(x)/sum(y));
+    
+    x1 = x * cosd(alpha) - y*sind(alpha);
+    y1 = x * sind(alpha) + y*cosd(alpha);
+
+    figure, plot(x1,y1, 'o');
+    axis([-1000 1000 0 1000]);
+    
+    W = max(y1) - min(y1);
+    L = max(x1) - min(x1);
+
+%     if max(y1) - min(y1) < max(x1) - min(x1)
+%         W = max(y1) - min(y1);
+%         L = max(x1) - min(x1);
+%     else
+%         L = max(y1) - min(y1);
+%         W = max(x1) - min(x1);
+%     end
+
+    
+    sample = [N L W];
+
+end
+
+
 

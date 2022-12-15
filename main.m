@@ -2,10 +2,12 @@ clear;
 close all;
 clc;
 
-N = 10; % numder of objects
+N = 100; % numder of objects
 
 PN = [];
 TN = [];
+
+load('net.mat');
 
 for i = 1:N
     % done: select random type of object
@@ -20,9 +22,12 @@ for i = 1:N
     x0 = R*sind(fi);
     y0 = R*cosd(fi);
 
+    x1 = [];
+    y1 = [];
+
     switch type
         case 1
-            ON = randi(5) + 5;
+            ON = randi(20) + 20;
             OW = randi(5) + 5;
             OL = randi(50) + 50;
 
@@ -35,7 +40,7 @@ for i = 1:N
 
         case 2 
             ON = randi(4) + 1;
-            OW = randi(29) + 1;
+            OW = randi(2) + 1;
             OL = randi(2) + 1;
 
             for j = 1:ON
@@ -46,7 +51,7 @@ for i = 1:N
             end
             
         case 3
-            ON = randi(20) + 30;
+            ON = randi(50) + 50;
             OW = randi(20) + 90;
             OL = randi(80) + 70;
 
@@ -92,14 +97,25 @@ for i = 1:N
 
     [x,y] = process_echo(signal);
 
-%     figure, plot(x,y, 'o');
+%     figure, plot(x,y, 'or');
+%     axis([-200 200 0 1000]);
+%     hold on;
+%     plot(y1,x1, 'ob');
 %     axis([-200 200 0 1000]);
 
     % done: calculate width and length
     [ sample ] = calc_params(x, y);
 
+    nn_type = net.Network(sample');
+
     PN = [PN; sample];
-    TN = [TN; type];
+%     TN = [TN; type];
+
+    tt = zeros(1,3);
+    tt(type) = 1;
+
+    TN = [TN; tt];
+
 
     % todo: train NN
     % todo: calculate VPK
@@ -191,7 +207,7 @@ end
 
 function [ sample ] = calc_params(x, y)
 
-    N = length(x);
+    Num = length(x);
     
     alpha = atand(sum(x)/sum(y));
     
@@ -201,21 +217,18 @@ function [ sample ] = calc_params(x, y)
 %     figure, plot(x1,y1, 'o');
 %     axis([-1000 1000 0 1000]);
     
-%     W = max(y1) - min(y1);
-%     L = max(x1) - min(x1);
+    W = max(y1) - min(y1);
+    L = max(x1) - min(x1);
 
-    if max(y1) - min(y1) < max(x1) - min(x1)
-        W = max(y1) - min(y1);
-        L = max(x1) - min(x1);
-    else
-        L = max(y1) - min(y1);
-        W = max(x1) - min(x1);
-    end
+%     if max(y1) - min(y1) < max(x1) - min(x1)
+%         W = max(y1) - min(y1);
+%         L = max(x1) - min(x1);
+%     else
+%         L = max(y1) - min(y1);
+%         W = max(x1) - min(x1);
+%     end
 
     
-    sample = [N L W];
+    sample = [Num L W];
 
 end
-
-
-

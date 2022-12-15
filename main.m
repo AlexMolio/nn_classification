@@ -2,7 +2,10 @@ clear;
 close all;
 clc;
 
-N = 1; % numder of objects
+N = 10; % numder of objects
+
+PN = [];
+TN = [];
 
 for i = 1:N
     % done: select random type of object
@@ -55,8 +58,8 @@ for i = 1:N
             end
     end
 
-    figure, plot(y1,x1,'o');
-    axis([-200 200 0 1000]);
+%     figure, plot(y1,x1,'o');
+%     axis([-200 200 0 1000]);
 
     % done: generate echo signal with params: fd = 120 000, fs = 30 000, T = 4
 
@@ -81,19 +84,22 @@ for i = 1:N
     
     end
 
-    figure, plot(signal(1,:));
-    hold on;
-    plot(signal(2,:));
+%     figure, plot(signal(1,:));
+%     hold on;
+%     plot(signal(2,:));
 
     % done: process input signal
 
     [x,y] = process_echo(signal);
 
-    figure, plot(x,y, 'o');
-    axis([-200 200 0 1000]);
+%     figure, plot(x,y, 'o');
+%     axis([-200 200 0 1000]);
 
     % done: calculate width and length
     [ sample ] = calc_params(x, y);
+
+    PN = [PN; sample];
+    TN = [TN; type];
 
     % todo: train NN
     % todo: calculate VPK
@@ -192,19 +198,19 @@ function [ sample ] = calc_params(x, y)
     x1 = x * cosd(alpha) - y*sind(alpha);
     y1 = x * sind(alpha) + y*cosd(alpha);
 
-    figure, plot(x1,y1, 'o');
-    axis([-1000 1000 0 1000]);
+%     figure, plot(x1,y1, 'o');
+%     axis([-1000 1000 0 1000]);
     
-    W = max(y1) - min(y1);
-    L = max(x1) - min(x1);
+%     W = max(y1) - min(y1);
+%     L = max(x1) - min(x1);
 
-%     if max(y1) - min(y1) < max(x1) - min(x1)
-%         W = max(y1) - min(y1);
-%         L = max(x1) - min(x1);
-%     else
-%         L = max(y1) - min(y1);
-%         W = max(x1) - min(x1);
-%     end
+    if max(y1) - min(y1) < max(x1) - min(x1)
+        W = max(y1) - min(y1);
+        L = max(x1) - min(x1);
+    else
+        L = max(y1) - min(y1);
+        W = max(x1) - min(x1);
+    end
 
     
     sample = [N L W];

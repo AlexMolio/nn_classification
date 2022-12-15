@@ -2,10 +2,14 @@ clear;
 close all;
 clc;
 
-N = 100; % numder of objects
+N = 200; % numder of objects
 
 PN = [];
 TN = [];
+
+NN_TN = [];
+
+vpk = 0;
 
 load('net.mat');
 
@@ -106,10 +110,7 @@ for i = 1:N
     % done: calculate width and length
     [ sample ] = calc_params(x, y);
 
-    nn_type = net.Network(sample');
-
     PN = [PN; sample];
-%     TN = [TN; type];
 
     tt = zeros(1,3);
     tt(type) = 1;
@@ -117,10 +118,22 @@ for i = 1:N
     TN = [TN; tt];
 
 
-    % todo: train NN
-    % todo: calculate VPK
+    % done: train NN
+    nn_res = net.Network(sample');
+    nn_type = find(max(nn_res) == nn_res);
+
+    NN_TN = [NN_TN; nn_type];
+
+
+    % done: calculate VPK
+
+    if nn_type == type
+        vpk = vpk + 1;
+    end
 
 end
+
+VPK = vpk/N
 
 function [x,y] = process_echo(s)
 
@@ -219,15 +232,6 @@ function [ sample ] = calc_params(x, y)
     
     W = max(y1) - min(y1);
     L = max(x1) - min(x1);
-
-%     if max(y1) - min(y1) < max(x1) - min(x1)
-%         W = max(y1) - min(y1);
-%         L = max(x1) - min(x1);
-%     else
-%         L = max(y1) - min(y1);
-%         W = max(x1) - min(x1);
-%     end
-
     
     sample = [Num L W];
 

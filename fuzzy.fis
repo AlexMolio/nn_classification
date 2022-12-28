@@ -1,0 +1,59 @@
+[System]
+Name='fuzzy'
+Type='mamdani'
+Version=2.0
+NumInputs=3
+NumOutputs=3
+NumRules=3
+AndMethod='min'
+OrMethod='max'
+ImpMethod='min'
+AggMethod='max'
+DefuzzMethod='centroid'
+
+[Input1]
+Name='len'
+Range=[0 150]
+NumMFs=3
+MF1='PL':'trimf',[8.028 75 100]
+MF2='IM':'trimf',[-1.14678899082569 2 13.8]
+MF3='OBL':'trimf',[60.0152905198777 110 150]
+
+[Input2]
+Name='wid'
+Range=[0 110]
+NumMFs=3
+MF1='PL':'trimf',[0.505 6.56 27.6401630988787]
+MF2='IM':'trimf',[-0.616717635066259 1.5 2]
+MF3='OBL':'trimf',[24.5 85.4994903160041 110]
+
+[Input3]
+Name='n'
+Range=[0 100]
+NumMFs=3
+MF1='PL':'trimf',[1.07 30 69.7757390417941]
+MF2='IM':'trimf',[-0.560652395514786 2 4]
+MF3='OBL':'trimf',[34.1 68.756371049949 100]
+
+[Output1]
+Name='PL'
+Range=[0 1]
+NumMFs=1
+MF1='pl':'trimf',[0 1 1]
+
+[Output2]
+Name='IM'
+Range=[0 1]
+NumMFs=1
+MF1='im':'trimf',[0 1 1]
+
+[Output3]
+Name='OBL'
+Range=[0 1]
+NumMFs=1
+MF1='obl':'trimf',[0 1 1]
+
+[Rules]
+1 1 1, 1 0 0 (1) : 1
+2 2 2, 0 1 0 (1) : 1
+3 3 3, 0 0 1 (1) : 1

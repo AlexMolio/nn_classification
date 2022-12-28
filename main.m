@@ -2,16 +2,18 @@ clear;
 close all;
 clc;
 
-N = 200; % numder of objects
+N = 20; % numder of objects
 
 PN = [];
 TN = [];
 
 NN_TN = [];
 
-vpk = 0;
+vpk_nn = 0;
+vpk_fuz = 0;
 
 load('net.mat');
+load('fuzzy.mat');
 
 for i = 1:N
     % done: select random type of object
@@ -122,18 +124,28 @@ for i = 1:N
     nn_res = net.Network(sample');
     nn_type = find(max(nn_res) == nn_res);
 
+    sample = [sample(2) sample(3) sample(1)];  %[Num L W]
+
+    fuz_res = evalfis(sample',fuzzy);
+    fuz_type = find(max(fuz_res) == fuz_res);
+
     NN_TN = [NN_TN; nn_type];
 
 
     % done: calculate VPK
 
-    if nn_type == type
-        vpk = vpk + 1;
+    if length(nn_type) == 1 && nn_type == type
+        vpk_nn = vpk_nn + 1;
+    end
+
+    if length(fuz_type) == 1 && fuz_type == type
+        vpk_fuz = vpk_fuz + 1;
     end
 
 end
 
-VPK = vpk/N
+VPK_NN = string((vpk_nn/N)*100)+' %'
+VPK_FUZ = string((vpk_fuz/N)*100)+' %'
 
 function [x,y] = process_echo(s)
 
